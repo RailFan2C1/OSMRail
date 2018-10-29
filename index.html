@@ -6,8 +6,8 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>VR Map</title>
-    <meta name="description" content="VR Map">
+    <title>OSMRail</title>
+    <meta name="description" content="OSMRail">
     <link rel="stylesheet" href="vrmap.css">
     <script src="https://aframe.io/aframe/dist/aframe-master.min.js"></script>
     <script src="https://unpkg.com/aframe-animation-component/dist/aframe-animation-component.min.js"></script>
@@ -15,37 +15,53 @@
     <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.controls.min.js"></script>
     <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.pathfinding.min.js"></script><!-- errors on controls if not present? -->
     <script src="https://unpkg.com/osmtogeojson/osmtogeojson.js"></script>
+    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script>
     <script src="map.js"></script>
     <script src="position-limit.js"></script>
     <script src="conversions.js"></script>
     <script src="tiles.js"></script>
     <script src="trees.js"></script>
     <script src="buildings.js"></script>
+    <script src="railways.js"></script>
+    <script src="routes.js"></script>
   </head>
   <body>
     <div id="introDialog">
-      <h1>VR Map - OpenStreetMap goes WebVR</h1>
+      <h1>OSMRail - OpenStreetMap Railsimulator</h1>
       <div id="generalinfo">
-      <p>This experimental app displays OpenStreetMap data (ground tiles, trees,
-        and buildings) in a web-based Virtual Reality environment.
+      <p>This is an experimental railsimutaion using OpenStreetMap data.
       </p>
       <p>You can use mouse drags to pan around and the W/A/S/D keys to fly
         through the scene, or switch to VR mode and use the trigger on your
-        controller to teleport around (or the trackpad to fly).
+        controller to teleport around (or the trackpad to fly). Use C to toggle camera.
       </p>
-      <p>One of the limitations is that currently only a small area gets loaded
-        and no additional scenery will get added when moving around.
+      <p>Use short routes only and start without details.
+         
       </p>
       </div>
       <div id="locationSettings">
       <select id="locationPresets"></select><br>
+      <input class="routes" id="routeId" placeholder="route"><!--value="935322" >-->
+      route id from
+        <a href="https://wiki.openstreetmap.org/wiki/Category:Public_transport_by_country">
+          https://wiki.openstreetmap.org/wiki/Category:Public_transport_by_country
+        </a><br>
+      enter coordinates of the first node of the first way in your route<br>
       <input type="number" class="coords" id="locLatitude" placeholder="latitude" step="0.00001" min="-90" max="90"> /
       <input type="number" class="coords" id="locLongitude" placeholder="longitude" step="0.00001" min="-180" max="180"><br>
+      show <input type="checkbox" id="showTrees" >trees
+      <input type="checkbox" id="showBuildings" >buildings
+      <input type="checkbox" id="showTies" >ties/sleepers
+      <br>      
       <button id="locationLoadButton">Load location</button>
       </div>
       <div id="legalinfo">
       <p>The source code can be found as
-        <a href="https://github.com/KaiRo-at/vrmap">KaiRo-at/vrmap at GitHub</a>.
+        <a href="https://github.com/RailFan2C1/OSMRail">RailFan2C1/OSMRail at GitHub</a>.
+      </p>
+      <p>Many thanks to Robert for his inspiration
+        <a href="https://github.com/KaiRo-at/vrmap">KaiRo-at/vrmap at GitHub</a>
       </p>
       <p>Map data and imagery of ground tiles &copy;
         <a href="http://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>
@@ -58,7 +74,7 @@
       </p>
     </div>
     <a-scene background="color: #CFEBFD">
-      <a-entity id="ground" geometry="primitive: box; width: 2000; height: 0.01; depth: 2000" position="0 -0.01 0" material="transparent: true; opacity: 0.01"></a-entity>
+      <!--<a-entity id="ground" geometry="primitive: box; width: 100000; height: 0.01; depth: 100000" position="0 -1 0" material="color: white"></a-entity>-->
       <a-entity id="map">
         <a-entity id="tiles">
         </a-entity>
@@ -80,7 +96,23 @@
                   oculus-touch-controls="hand: right" vive-controls="hand: right" windows-motion-controls="hand: right;"
                   daydream-controls="hand: right" gearvr-controls="hand: right"></a-entity>
         <!-- menu -->
-        <a-plane id="menu" color="#404040" position="0 2 -1" visible="false"></a-entity>
+        <a-plane id="menu" color="#404040" position="0 2 -1" visible="false"></a-plane>
+      </a-entity>
+
+
+      <a-entity>
+        <a-curve id="path1">
+		  <a-curve-point id="checkpoint1a" position="0 1 0.01"></a-curve-point>
+          <a-curve-point id="checkpoint2a" position="0 1 -0.01"></a-curve-point>
+		</a-curve>
+
+        <a-entity id="mover" position="0 0 0" alongpath="curve: #path1; loop:false; dur:6000; delay:20000; triggerRadius:0.1; rotate:true;">
+          <a-box position="0 1.1 0" color="#ffff00" width="2.65" height="3.715" depth="20.105"></a-box>
+          <a-entity id="driver" camera="active: false" look-controls position="0 1 0" active="false"></a-entity><!---->
+        </a-entity>
+        <a-entity id="over" position="0 100 0">
+          <a-entity id="cover" camera="active: false" look-controls  active="false"></a-entity>
+        </a-entity>
       </a-entity>
     </a-scene>
   </body>
