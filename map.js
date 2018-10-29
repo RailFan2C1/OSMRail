@@ -7,24 +7,34 @@ var presetsFile = "presets.json";
 var centerPos;
 var map, tiles, items;
 var baseTileID, baseTileSize, centerOffset;
-var tilesFromCenter = 3;
+var tilesFromCenter = 1;
+var rcount = 0;
+var cam = 0;
+var nextTrack = new Array;
+var nextTrackR = new Array;
+var nextTrackLen = new Array;
+var nt = 0;
+var helper = new Array;
+var speed = 80;
+var xmin=100000, xmax=-100000, zmin=100000, zmax=-100000, ymax=100;
 
 // Mapnik is the default world-wide OpenStreetMap style.
 var tileServer = "https://tilecache.kairo.at/mapnik/";
 // Basemap offers hires tiles for Austria.
 //var tileServer = "https://tilecache.kairo.at/basemaphires/";
 // Standard Overpass API Server
-var overpassURL = "https://overpass-api.de/api/interpreter";
+//var overpassURL = "https://overpass-api.de/api/interpreter";
+var overpassURL = "https://lz4.overpass-api.de/api/interpreter";
 
 window.onload = function() {
   // Close intro dialog on clicking its button.
   document.querySelector("#introDialogCloseButton").onclick = event => {
     event.target.parentElement.parentElement.classList.add("hidden");
   };
-  // Close intro dialog when entering VR mode.
+  /* Close intro dialog when entering VR mode.
   document.querySelector('a-scene').addEventListener('enter-vr', event => {
     document.querySelector("#introDialogCloseButton").click();
-  });
+  });*/
 
   // Load location presets and subdialog.
   fetch(presetsFile)
@@ -41,15 +51,18 @@ window.onload = function() {
     let menu = document.querySelector("#menu");
     let locLatInput = document.querySelector("#locLatitude");
     let locLonInput = document.querySelector("#locLongitude");
+    let routeInput = document.querySelector("#routeId");
     presetSel.onchange = function(event) {
       if (event.target.selectedIndex >= 0 && event.target.value >= 0) {
         let preset = locationPresets[event.target.value];
         locLatInput.value = preset.latitude;
         locLonInput.value = preset.longitude;
+        routeInput.value = preset.routeId;
       }
       else {
         locLatInput.value = "";
         locLonInput.value = "";
+        routeInput.value = "";
         if (event.target.value == -2) {
           navigator.geolocation.getCurrentPosition(pos => {
             locLatInput.value = pos.coords.latitude;
@@ -104,13 +117,14 @@ window.onload = function() {
     presetSel.value = 0;
     locLatInput.value = centerPos.latitude;
     locLonInput.value = centerPos.longitude;
+    routeInput.value = locationPresets[0].routeId;//"935322"
     document.querySelector("#locationLoadButton").onclick = event => {
       centerPos.latitude = locLatInput.valueAsNumber;
       centerPos.longitude = locLonInput.valueAsNumber;
       loadScene();
     };
     // Load objects into scene.
-    loadScene();
+    //loadScene();
   })
   .catch((reason) => { console.log(reason); });
 
@@ -135,12 +149,9 @@ window.onload = function() {
   // Keyboard press
   document.querySelector("body").addEventListener("keydown", event => {
     if (event.key == "m") { toggleMenu(event); }
+    else if (event.key == "c") { toggleCamera(event); }
   });
 
-  // Set variables for base objects.
-  map = document.querySelector("#map");
-  tiles = document.querySelector("#tiles");
-  items = document.querySelector("#items");
 }
 
 function toggleMenu(event) {
@@ -158,13 +169,86 @@ function toggleMenu(event) {
   }
 }
 
+function toggleCamera(event) {
+  var cHead = document.querySelector("#head");
+  var cDriver = document.querySelector("#driver");
+  var cOver = document.querySelector("#cover");
+  if (cam == 0) {
+    cHead.setAttribute('camera', { active: "true" });
+    cDriver.setAttribute('camera', { active: "false" });
+    cOver.setAttribute('camera', { active: "false" });
+    cam=1;
+  }
+  else if (cam == 1){
+    cHead.setAttribute('camera', { active: "false" });
+    cDriver.setAttribute('camera', { active: "false" });
+    cOver.setAttribute('camera', { active: "true" });
+    cam=2;
+  }
+  else {
+    cHead.setAttribute('camera', { active: "false" });
+    cDriver.setAttribute('camera', { active: "true" });
+    cOver.setAttribute('camera', { active: "false" });
+    cam=0;
+  }
+}
+
 function loadScene() {
+  
+  // Set variables for base objects.
+  map = document.querySelector("#map");
+  tiles = document.querySelector("#tiles");
+  items = document.querySelector("#items");
+
+  rcount=0;baseTileID=0; baseTileSize=0;centerOffset=0;nt=0;
   while (tiles.firstChild) { tiles.removeChild(tiles.firstChild); }
   while (items.firstChild) { items.removeChild(items.firstChild); }
   document.querySelector("#cameraRig").object3D.position.set(0, 0, 0);
   loadGroundTiles();
-  loadTrees();
-  loadBuildings();
+  if (document.querySelector("#showTrees").checked==true) { loadTrees() };
+  if (document.querySelector("#showBuildings").checked==true) { loadBuildings() };
+  loadRailways();
+  loadRoutes();
+
+
+
+  var mover = document.querySelector("#mover");
+  mover.setAttribute('alongpath', { curve: '#path1' });
+  //trackId: track30015494 fx:48.7577244 fz:9.1700061 lx:48.7633819 lz:9.1693283  anz:55 pos:111.53951894268577 0 746.7761660840429
+  setTimeout(function(){
+	var cOver = document.querySelector("#over");
+  	console.log("xmin: "+xmin+" xmax: "+xmax+" zmin: "+zmin+" zmax: "+zmax);
+    var cx = xmax-((xmax-xmin)/2);
+    var cz = zmax-((zmax-zmin)/2);
+    var cy = 10000;
+    if (xmax-xmin>zmax-zmin) {cy=xmax-xmin;}
+    else {cy=zmax-zmin;}
+    if (cy>10000) {cy=10000;}
+    console.log("cx: "+cx+" cy: "+cy+" cz: "+cz);
+    cOver.setAttribute('position', { x: cx, y: cy, z: cz});
+
+    mover.addEventListener("movingended", function(){
+	  ntr = fnextTrack();
+      AFRAME.utils.entity.setComponentProperty(this, "alongpath.curve", ntr.nt);
+      AFRAME.utils.entity.setComponentProperty(this, "alongpath.dur", ntr.dur);
+      AFRAME.utils.entity.setComponentProperty(this, "alongpath.delay", "0");
+      AFRAME.utils.entity.setComponentProperty(this, "alongpath.loop", "true");
+    });
+  }, 10000);
+/**/
+}
+
+
+function fnextTrack() {
+	var nt2 = nextTrack[nt]+""+nextTrackR[nt];
+	var ntLen = nextTrackLen[nt];
+	var dur = (ntLen/(speed/3.6))*1000;
+    console.log("nt"+nt+" "+nt2+" dur: "+dur);
+	if(nt<rcount-1)
+      {nt++;}
+   	else
+      {nt=0;}
+    return {nt: "#"+nt2,dur: dur};//"#"+nt2;//
 }
 
 function getTagsForXMLFeature(xmlFeature) {
