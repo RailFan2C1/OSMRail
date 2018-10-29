@@ -21,9 +21,16 @@ var specialDefaults = {
 
 function loadBuildings() {
   // we could think about including shelter=yes and maybe some amenity= types.
+  var rId=document.getElementById('routeId').value;
+  var opQuery = "relation("+rId+")->.bahn;(" +
+	  			"way[building](around.bahn:50);" +
+                "rel[building](around.bahn:50););" +
+                "out body;>;out skel qt;";
+/*
   var opQuery = "(way[building]" + "(" + getBoundingBoxString() + ");" +
                 "rel[building]" + "(" + getBoundingBoxString() + "););" +
                 "out body;>;out skel qt;";
+*/ 
   return fetchFromOverpass(opQuery)
     .then((itemJSON) => {
       var count = 0;
