@@ -19,10 +19,10 @@ var specialDefaults = {
   water_tower: {"height": 20},
 };
 
-function loadRailways() {
+function loadRailways(loadNext) {
   // we could think about including shelter=yes and maybe some amenity= types.
-  var rId=document.getElementById('routeId').value;
-  var opQuery = "relation("+rId+")->.bahn;(" +
+  //var rId=document.getElementById('routeId').value;
+  var opQuery = "way("+loadNext+")->.bahn;(" +
 	  			"way[railway](around.bahn:50););" +
                 "out body;>;out skel qt;";
   /*
@@ -172,7 +172,7 @@ AFRAME.registerGeometry('railway', {
       height = Math.min(10, outerLength / 5);
     }
     var geometry = new THREE.ExtrudeGeometry(shape, {amount: height, bevelEnabled: false});
-    // As Y is the coordinate going up, let's rotate by 90° to point Z up.
+    // As Y is the coordinate going up, let's rotate by 90Â° to point Z up.
     geometry.rotateX(-Math.PI / 2);
     // Rotate around Y and Z as well to make it show up correctly.
     geometry.rotateY(Math.PI);
