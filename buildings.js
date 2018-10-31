@@ -19,10 +19,10 @@ var specialDefaults = {
   water_tower: {"height": 20},
 };
 
-function loadBuildings() {
+function loadBuildings(loadNext) {
   // we could think about including shelter=yes and maybe some amenity= types.
-  var rId=document.getElementById('routeId').value;
-  var opQuery = "relation("+rId+")->.bahn;(" +
+  //var rId=document.getElementById('routeId').value;
+  var opQuery = "way("+loadNext+")->.bahn;(" +
 	  			"way[building](around.bahn:50);" +
                 "rel[building](around.bahn:50););" +
                 "out body;>;out skel qt;";
