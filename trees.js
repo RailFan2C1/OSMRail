@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-function loadTrees() {
+function loadTrees(loadNext) {
   /*
   var opQuery = "node[natural=tree]" + "(" + getBoundingBoxString() + ");" +
                 "out;";
   */
-  var rId=document.getElementById('routeId').value;
-  var opQuery = "relation("+rId+")->.bahn;(" +
+  //var rId=document.getElementById('routeId').value;
+  var opQuery = "way("+loadNext+")->.bahn;(" +
 	  			"node[natural=tree](around.bahn:50););" +
                 "out;";
   return fetchFromOverpass(opQuery)
