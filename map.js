@@ -209,8 +209,10 @@ function loadScene() {
   if (document.querySelector("#showBuildings").checked==true) { loadBuildings() };
   loadRailways();
   loadRoutes();
-
-
+  //var loadNxt=document.getElementById('routeId').value;
+  //if (document.querySelector("#showTrees").checked==true) { loadTrees(loadNxt) };
+  //if (document.querySelector("#showBuildings").checked==true) { loadBuildings(loadNxt) };
+  //loadRailways(loadNxt);
 
   var mover = document.querySelector("#mover");
   mover.setAttribute('alongpath', { curve: '#path1' });
@@ -226,29 +228,53 @@ function loadScene() {
     if (cy>10000) {cy=10000;}
     console.log("cx: "+cx+" cy: "+cy+" cz: "+cz);
     cOver.setAttribute('position', { x: cx, y: cy, z: cz});
+    
+    var loadNxt = nextTrack[0].substring(5, 30);
+    var unloadRrv = "";var remoR="";var remoB="";var remoT="";
+    loadRailways(loadNxt);
+    if (document.querySelector("#showTrees").checked==true) { loadTrees(loadNxt) };
+    if (document.querySelector("#showBuildings").checked==true) { loadBuildings(loadNxt) };
 
     mover.addEventListener("movingended", function(){
-	  ntr = fnextTrack();
-      AFRAME.utils.entity.setComponentProperty(this, "alongpath.curve", ntr.nt);
+      //move train to next track
+      ntr = fnextTrack();
+      AFRAME.utils.entity.setComponentProperty(this, "alongpath.curve", ntr.ntNum);
       AFRAME.utils.entity.setComponentProperty(this, "alongpath.dur", ntr.dur);
       AFRAME.utils.entity.setComponentProperty(this, "alongpath.delay", "0");
       AFRAME.utils.entity.setComponentProperty(this, "alongpath.loop", "true");
+      //load next elements
+      if (ntr.nt<rcount-1){
+        loadNxt = nextTrack[ntr.nt+1].substring(5, 30);
+        loadRailways(loadNxt);
+        if (document.querySelector("#showTrees").checked==true) { loadTrees(loadNxt) };
+        if (document.querySelector("#showBuildings").checked==true) { loadBuildings(loadNxt) };	
+      }
+      //unload previous elements
+      if (ntr.nt>1){
+        unloadRrv = nextTrack[ntr.nt-2].substring(5, 30);
+        remoR = document.querySelector("#railway"+unloadRrv);
+        remoR.parentNode.removeChild(remoR);
+        remoB = document.querySelector("#building"+unloadRrv);
+        remoB.parentNode.removeChild(remoB);
+        remoT = document.querySelector("#tree"+unloadRrv);
+        remoT.parentNode.removeChild(remoT);
+      }
     });
-  }, 10000);
+  }, 20000);
 /**/
 }
 
 
 function fnextTrack() {
-	var nt2 = nextTrack[nt]+""+nextTrackR[nt];
+	var ntNum = nextTrack[nt]+""+nextTrackR[nt];
 	var ntLen = nextTrackLen[nt];
 	var dur = (ntLen/(speed/3.6))*1000;
-    console.log("nt"+nt+" "+nt2+" dur: "+dur);
+    console.log("nt"+nt+" "+ntNum+" dur: "+dur);
 	if(nt<rcount-1)
       {nt++;}
    	else
-      {nt=0;}
-    return {nt: "#"+nt2,dur: dur};//"#"+nt2;//
+      {}//alert('end of route, please reload!');} //nt=0;}
+    return {nt: nt,ntNum: "#"+ntNum,dur: dur};//"#"+ntNum;//
 }
 
 function getTagsForXMLFeature(xmlFeature) {
