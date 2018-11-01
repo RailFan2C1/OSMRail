@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+var itema;
+
 function loadTrees(loadNext) {
   /*
   var opQuery = "node[natural=tree]" + "(" + getBoundingBoxString() + ");" +
@@ -13,6 +15,8 @@ function loadTrees(loadNext) {
                 "out;";
   return fetchFromOverpass(opQuery)
     .then((itemJSON) => {
+      itema = document.createElement("a-entity");
+      itema.setAttribute("id", "tree"+loadNext);
       var count = 0;
       for (feature of itemJSON.features) {
         if (feature.geometry.type == "Point") {
@@ -25,6 +29,7 @@ function loadTrees(loadNext) {
         }
       }
       console.log("Loaded " + count + " trees.");
+      items.appendChild(itema);
     })
     .catch((reason) => { console.log(reason); });
 }
@@ -68,7 +73,7 @@ function addTree(jsonFeature) {
     item.setAttribute("data-gpspos", jsonFeature.geometry.coordinates[1] + "/" + jsonFeature.geometry.coordinates[0]);
     item.appendChild(trunk);
     item.appendChild(crown);
-    items.appendChild(item);
+    itema.appendChild(item);
     resolve();
     // reject("whatever the error");
   });

@@ -14,10 +14,20 @@
     "longitude": 9.1118496,
     "routeId": 162289
   },
-  { "title": "S5 Stuttgart Schwabstraße => Bietigheim-Bissingen",
+  { "title": "S3 Backnang => Flughafen/Messe",
+    "latitude": 48.9424847, 
+    "longitude": 9.4260763,
+    "routeId": 34810
+  },
+  { "title": "S5 Stuttgart Schwabstraï¿½e => Bietigheim-Bissingen",
     "latitude": 48.7702059,
     "longitude": 9.1569934,
     "routeId": 67280
+  },
+  { "title": "Tram 18: Burggasse-Stadthalle => Schlachthausgasse",
+    "latitude": 48.2024532,
+    "longitude": 16.3375540,
+    "routeId": 1809912
   },
   { "title": "NYCS - S Train (42nd Street)",
     "latitude": 40.7517981,

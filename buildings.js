@@ -18,6 +18,7 @@ var specialDefaults = {
   transformer_tower: {"height": 10},
   water_tower: {"height": 20},
 };
+var itema;
 
 function loadBuildings(loadNext) {
   // we could think about including shelter=yes and maybe some amenity= types.
@@ -33,6 +34,8 @@ function loadBuildings(loadNext) {
 */ 
   return fetchFromOverpass(opQuery)
     .then((itemJSON) => {
+      itema = document.createElement("a-entity");
+      itema.setAttribute("id", "building"+loadNext);
       var count = 0;
       for (feature of itemJSON.features) {
         if (feature.geometry.type == "Polygon") {
@@ -45,6 +48,7 @@ function loadBuildings(loadNext) {
         }
       }
       console.log("Loaded " + count + " buildings.");
+      items.appendChild(itema);
     })
     .catch((reason) => { console.log(reason); });
 }
@@ -124,7 +128,7 @@ function addBuilding(jsonFeature) {
     item.setAttribute("material", {color: color});
     item.setAttribute("position", getPositionFromTilepos(itemPos));
     item.setAttribute("data-gpspos", jsonFeature.geometry.coordinates[0][0][1] + "/" + jsonFeature.geometry.coordinates[0][0][0]);
-    items.appendChild(item);
+    itema.appendChild(item);
     resolve();
     // reject("whatever the error");
   });
