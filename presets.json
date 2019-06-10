@@ -1,12 +1,12 @@
 [
   { "title": "10: Marienplatz => Degerloch",
-    "latitude": 48.7644333,
-    "longitude": 9.168486,
+    "latitude": 48.7643004,
+    "longitude": 9.1686351,
     "routeId": 935322
   },
   { "title": "10: Degerloch => Marienplatz",
-    "latitude": 48.7487864, 
-    "longitude": 9.1687401,
+    "latitude": 48.7489490, 
+    "longitude": 9.1690838,
     "routeId": 935320
   },
   { "title": "U3: Vaihingen => Plieningen",

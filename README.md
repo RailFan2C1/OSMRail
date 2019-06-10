@@ -38,6 +38,6 @@ and Mozilla's A-Frame library to display it.
  (https://www.openstreetmap.org/node/26028180 uses last, not first node)
 
 -note the coordinates (above attribues) and enter latitude and longitude in OSMRail
-#IMPORTANT: you must press load within ONE minute! (so find values first, reload OSMRail and do copy and paste)
+
 
 
