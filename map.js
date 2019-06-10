@@ -27,15 +27,6 @@ var tileServer = "https://tilecache.kairo.at/mapnik/";
 var overpassURL = "https://lz4.overpass-api.de/api/interpreter";
 
 window.onload = function() {
-  // Close intro dialog on clicking its button.
-  document.querySelector("#introDialogCloseButton").onclick = event => {
-    event.target.parentElement.parentElement.classList.add("hidden");
-  };
-  /* Close intro dialog when entering VR mode.
-  document.querySelector('a-scene').addEventListener('enter-vr', event => {
-    document.querySelector("#introDialogCloseButton").click();
-  });*/
-
   // Load location presets and subdialog.
   fetch(presetsFile)
   .then((response) => {
@@ -121,6 +112,7 @@ window.onload = function() {
     document.querySelector("#locationLoadButton").onclick = event => {
       centerPos.latitude = locLatInput.valueAsNumber;
       centerPos.longitude = locLonInput.valueAsNumber;
+      event.target.parentElement.parentElement.classList.add("hidden");
       loadScene();
     };
     // Load objects into scene.
@@ -215,7 +207,8 @@ function loadScene() {
   //loadRailways(loadNxt);
 
   var mover = document.querySelector("#mover");
-  mover.setAttribute('alongpath', { curve: '#path1' });
+  //mover.setAttribute('alongpath', { curve: '#path1' });
+  mover.setAttribute('alongpath', { curve: '#path1' , loop:false, dur:30000, triggerRadius:0.1, rotate:false});
   //trackId: track30015494 fx:48.7577244 fz:9.1700061 lx:48.7633819 lz:9.1693283  anz:55 pos:111.53951894268577 0 746.7761660840429
   setTimeout(function(){
 	var cOver = document.querySelector("#over");
@@ -242,6 +235,7 @@ function loadScene() {
       AFRAME.utils.entity.setComponentProperty(this, "alongpath.dur", ntr.dur);
       AFRAME.utils.entity.setComponentProperty(this, "alongpath.delay", "0");
       AFRAME.utils.entity.setComponentProperty(this, "alongpath.loop", "true");
+      AFRAME.utils.entity.setComponentProperty(this, "alongpath.rotate", "true");
       //load next elements
       if (ntr.nt<rcount-1){
         loadNxt = nextTrack[ntr.nt+1].substring(5, 30);
