@@ -10,9 +10,9 @@ function loadRoutes() {
   var opQuery = "(rel[route=train][ref=S2][to=Filderstadt]" + "(" + getBoundingBoxString() + "););" +
                 "out body;>;out meta qt;";
   */
-  var rId=document.getElementById('routeId').value;   //rId=34809;
-  var rlat=document.getElementById('locLatitude').value;
-  var rlon=document.getElementById('locLongitude').value;
+  var rId=routeId;   //rId=34809;
+  var rlat=centerPos.latitude;
+  var rlon=centerPos.longitude;
 
   var opQuery = "(rel("+rId+"););" +
                 "out body;>;out meta qt;";

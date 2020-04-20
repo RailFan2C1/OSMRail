@@ -29,22 +29,6 @@
 
   </head>
   <body>
-    <div id="introDialog">
-      
-      <div id="locationSettings">
-      <select id="locationPresets"></select><br>
-      <input class="routes" id="routeId" placeholder="route" value="935322" >route id<br>
-      <input type="number" class="coords" id="locLatitude" placeholder="latitude" step="0.00001" min="-90" max="90" value="48.7643004"> /
-      <input type="number" class="coords" id="locLongitude" placeholder="longitude" step="0.00001" min="-180" max="180" value="9.1686351"><br>
-      show <input type="checkbox" id="showTrees" >trees
-      <input type="checkbox" id="showBuildings" >buildings
-      <input type="checkbox" id="showTies" >ties/sleepers
-      <br>      
-      <button id="locationLoadButton">Start</button>
-      </div>
-
-
-    </div>
     <a-scene background="color: #CFEBFD">
       <!--<a-entity id="ground" geometry="primitive: box; width: 100000; height: 0.01; depth: 100000;" position="0 -1 0" material="color: white"></a-entity>-->
       <a-entity id="map">

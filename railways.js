@@ -283,7 +283,7 @@ function addRailwayLine(jsonFeature) {
 	entityE3.setAttribute('material', 'shader', 'line');
 	entityE3.setAttribute('material', 'color', color);
     item.appendChild(entityE3);
-
+/*
 	if (document.querySelector("#showTies").checked==true)
 	{
       var entityE4 = document.createElement('a-entity');
@@ -292,7 +292,7 @@ function addRailwayLine(jsonFeature) {
 	  entityE4.setAttribute('material', 'color', 'brown');
       item.appendChild(entityE4);
 	}
-
+*/
     // Note that for now only one inner way (hole) is supported.
     //item.setAttribute("geometry", "primitive: sphere; radius: 1;");
     //item.setAttribute("material", "color: " + color + ";");

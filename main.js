@@ -5,6 +5,7 @@
 var tileZoom = 19;
 var presetsFile = "presets.json";
 var centerPos;
+var routeId, showTrees, showBuildings, startRevert
 var map, tiles, items;
 var baseTileID, baseTileSize, centerOffset;
 var tilesFromCenter = 1;
@@ -28,148 +29,24 @@ var overpassURL = "https://lz4.overpass-api.de/api/interpreter";
 
 window.onload = function() {
   let params = (new URL(document.location)).searchParams;
-  let routeId2 = parseInt(params.get("routeId")); 
-  let startRevert = params.get("startRevert"); 
-  let showTrees2 = params.get("showTrees"); 
-  let showBuildings2 = params.get("showBuildings"); 
-  //alert(routeId2+"r"+startRevert+"t"+showTrees2+"b"+showBuildings2);
-  document.getElementById('routeId').value=routeId2;
-    
-  // Load location presets and subdialog.
-  fetch(presetsFile)
-  .then((response) => {
-    if (response.ok) {
-      return response.json();
-    }
-    else {
-      throw "HTTP Error " + response.status;
-    }
-  })
-  .then((locationPresets) => {
-    let presetSel = document.querySelector("#locationPresets");
-    let menu = document.querySelector("#menu");
-    let locLatInput = document.querySelector("#locLatitude");
-    let locLonInput = document.querySelector("#locLongitude");
-    let routeInput = document.querySelector("#routeId");
-    presetSel.onchange = function(event) {
-      if (event.target.selectedIndex >= 0 && event.target.value >= 0) {
-        let preset = locationPresets[event.target.value];
-        locLatInput.value = preset.latitude;
-        locLonInput.value = preset.longitude;
-        routeInput.value = preset.routeId;
-      }
-      else {
-        locLatInput.value = "";
-        locLonInput.value = "";
-        routeInput.value = "";
-        if (event.target.value == -2) {
-          navigator.geolocation.getCurrentPosition(pos => {
-            locLatInput.value = pos.coords.latitude;
-            locLonInput.value = pos.coords.longitude;
-          });
-        }
-      }
-    };
-    let mItemHeight = 0.1;
-    let normalBgColor = "#404040";
-    let normalTextColor = "#CCCCCC";
-    let hoverBgColor = "#606060";
-    let hoverTextColor = "yellow";
-    let menuHeight = mItemHeight * locationPresets.length;
-    menu.setAttribute("height", menuHeight);
-    menu.setAttribute("position", {x: 0, y: 1.6 - menuHeight / 6, z: -1});
-    for (let i = -2; i < locationPresets.length; i++) {
-      var opt = document.createElement("option");
-      opt.value = i;
-      if (i == -2) { opt.text = "Get Your Location"; }
-      else if (i == -1) { opt.text = "Set Custom Location"; }
-      else { opt.text = locationPresets[i].title; }
-      presetSel.add(opt, null);
-      if (i >= 0) {
-        // menu entity
-        var menuitem = document.createElement("a-box");
-        menuitem.setAttribute("class", "clickable");
-        menuitem.setAttribute("position", {x: 0, y: menuHeight / 2 - (i + 0.5) * mItemHeight, z: 0});
-        menuitem.setAttribute("height", mItemHeight);
-        menuitem.setAttribute("depth", 0.001);
-        menuitem.setAttribute("text", {value: opt.text, color: normalTextColor, xOffset: 0.03});
-        menuitem.setAttribute("color", normalBgColor);
-        menuitem.setAttribute("data-index", i);
-        menuitem.addEventListener("mouseenter", event => {
-          event.target.setAttribute("text", {color: hoverTextColor});
-          event.target.setAttribute("color", hoverBgColor);
-        });
-        menuitem.addEventListener("mouseleave", event => {
-          event.target.setAttribute("text", {color: normalTextColor});
-          event.target.setAttribute("color", normalBgColor);
-        });
-        menuitem.addEventListener("click", event => {
-          let preset = locationPresets[event.target.dataset.index];
-          centerPos.latitude = preset.latitude;
-          centerPos.longitude = preset.longitude;
-          loadScene();
-        });
-        menu.appendChild(menuitem);
-      }
-    }
-    centerPos = { latitude: locationPresets[0].latitude,
-                  longitude: locationPresets[0].longitude };
-    presetSel.value = 0;
-    locLatInput.value = centerPos.latitude;
-    locLonInput.value = centerPos.longitude;
-    routeInput.value = locationPresets[0].routeId;//"935322"
-    document.querySelector("#locationLoadButton").onclick = event => {
-      centerPos.latitude = locLatInput.valueAsNumber;
-      centerPos.longitude = locLonInput.valueAsNumber;
-      event.target.parentElement.parentElement.classList.add("hidden");
-      loadScene();
-    };
-    // Load objects into scene.
-    //loadScene();
-  })
-  .catch((reason) => { console.log(reason); });
+  routeId = parseInt(params.get("routeId")); 
+  startRevert = params.get("startRevert"); 
+  showTrees = params.get("showTrees"); 
+  showBuildings = params.get("showBuildings"); 
+  //alert(routeId+"r"+startRevert+"t"+showTrees+"b"+showBuildings);
+   
+  centerPos = { latitude: 0,
+                longitude: 0 };
+  centerPos.latitude = 48.7643004;
+  centerPos.longitude = 9.1686351;
 
-  // Hook up menu button iside the VR.
-  let leftHand = document.querySelector("#left-hand");
-  let rightHand = document.querySelector("#right-hand");
-  // Vive controllers, Windows Motion controllers
-  leftHand.addEventListener("menudown", toggleMenu, false);
-  rightHand.addEventListener("menudown", toggleMenu, false);
-  // Oculus controllers (guessing on the button)
-  leftHand.addEventListener("surfacedown", toggleMenu, false);
-  rightHand.addEventListener("surfacedown", toggleMenu, false);
-  // Daydream and GearVR controllers - we need to filter as Vive and Windows Motion have the same event.
-  var toggleMenuOnStandalone = function(event) {
-    if (event.target.components["daydream-controls"].controllerPresent ||
-        event.target.components["gearvr-controls"].controllerPresent) {
-      toggleMenu(event);
-    }
-  }
-  leftHand.addEventListener("trackpaddown", toggleMenuOnStandalone, false);
-  rightHand.addEventListener("trackpaddown", toggleMenuOnStandalone, false);
+  loadScene();
+
   // Keyboard press
   document.querySelector("body").addEventListener("keydown", event => {
-    if (event.key == "m") { toggleMenu(event); }
-    else if (event.key == "c") { toggleCamera(event); }
+    if (event.key == "c") { toggleCamera(event); }
   });
 
-}
-
-function toggleMenu(event) {
-  console.log("menu pressed!");
-  let menu = document.querySelector("#menu");
-  if (menu.getAttribute("visible") == false) {
-    menu.setAttribute("visible", true);
-    document.querySelector("#cameraRig").setAttribute("movement-controls", {enabled: false});
-    document.querySelector("#left-hand").setAttribute("mixin", "handcursor");
-    document.querySelector("#right-hand").setAttribute("mixin", "handcursor");
-  }
-  else {
-    menu.setAttribute("visible", false);
-    document.querySelector("#cameraRig").setAttribute("movement-controls", {enabled: true});
-    document.querySelector("#left-hand").setAttribute("mixin", "teleport");
-    document.querySelector("#right-hand").setAttribute("mixin", "teleport");
-  }
 }
 
 function toggleCamera(event) {
@@ -208,8 +85,8 @@ function loadScene() {
   while (items.firstChild) { items.removeChild(items.firstChild); }
   document.querySelector("#cameraRig").object3D.position.set(0, 0, 0);
   loadGroundTiles();
-  if (document.querySelector("#showTrees").checked==true) { loadTrees() };
-  if (document.querySelector("#showBuildings").checked==true) { loadBuildings() };
+  if (showTrees=="on") { loadTrees() };
+  if (showBuildings=="on") { loadBuildings() };
   loadRailways();
   loadRoutes();
   //var loadNxt=document.getElementById('routeId').value;
@@ -236,8 +113,8 @@ function loadScene() {
     var loadNxt = nextTrack[0].substring(5, 30);
     var unloadRrv = "";var remoR="";var remoB="";var remoT="";
     loadRailways(loadNxt);
-    if (document.querySelector("#showTrees").checked==true) { loadTrees(loadNxt) };
-    if (document.querySelector("#showBuildings").checked==true) { loadBuildings(loadNxt) };
+    if (showTrees=="on") { loadTrees(loadNxt) };
+    if (showBuildings=="on") { loadBuildings(loadNxt) };
 
     mover.addEventListener("movingended", function(){
       //move train to next track
@@ -251,8 +128,8 @@ function loadScene() {
       if (ntr.nt<rcount-1){
         loadNxt = nextTrack[ntr.nt+1].substring(5, 30);
         loadRailways(loadNxt);
-        if (document.querySelector("#showTrees").checked==true) { loadTrees(loadNxt) };
-        if (document.querySelector("#showBuildings").checked==true) { loadBuildings(loadNxt) };	
+        if (showTrees=="on") { loadTrees(loadNxt) };
+        if (showBuildings=="on") { loadBuildings(loadNxt) };	
       }
       //unload previous elements
       if (ntr.nt>1){
