@@ -27,6 +27,14 @@ var tileServer = "https://tilecache.kairo.at/mapnik/";
 var overpassURL = "https://lz4.overpass-api.de/api/interpreter";
 
 window.onload = function() {
+  let params = (new URL(document.location)).searchParams;
+  let routeId2 = parseInt(params.get("routeId")); 
+  let startRevert = params.get("startRevert"); 
+  let showTrees2 = params.get("showTrees"); 
+  let showBuildings2 = params.get("showBuildings"); 
+  //alert(routeId2+"r"+startRevert+"t"+showTrees2+"b"+showBuildings2);
+  document.getElementById('routeId').value=routeId2;
+    
   // Load location presets and subdialog.
   fetch(presetsFile)
   .then((response) => {
@@ -80,6 +88,7 @@ window.onload = function() {
       if (i >= 0) {
         // menu entity
         var menuitem = document.createElement("a-box");
+        menuitem.setAttribute("class", "clickable");
         menuitem.setAttribute("position", {x: 0, y: menuHeight / 2 - (i + 0.5) * mItemHeight, z: 0});
         menuitem.setAttribute("height", mItemHeight);
         menuitem.setAttribute("depth", 0.001);
@@ -151,11 +160,13 @@ function toggleMenu(event) {
   let menu = document.querySelector("#menu");
   if (menu.getAttribute("visible") == false) {
     menu.setAttribute("visible", true);
+    document.querySelector("#cameraRig").setAttribute("movement-controls", {enabled: false});
     document.querySelector("#left-hand").setAttribute("mixin", "handcursor");
     document.querySelector("#right-hand").setAttribute("mixin", "handcursor");
   }
   else {
     menu.setAttribute("visible", false);
+    document.querySelector("#cameraRig").setAttribute("movement-controls", {enabled: true});
     document.querySelector("#left-hand").setAttribute("mixin", "teleport");
     document.querySelector("#right-hand").setAttribute("mixin", "teleport");
   }
@@ -292,7 +303,11 @@ function getBoundingBoxString() {
 
 function fetchFromOverpass(opQuery) {
   return new Promise((resolve, reject) => {
-    fetch(overpassURL + "?data=" + encodeURIComponent(opQuery))
+    //fetch(overpassURL + "?data=" + encodeURIComponent(opQuery))
+    fetch(overpassURL, {
+      method: 'POST',
+      body: opQuery
+    })
     .then((response) => {
       if (response.ok) {
         return response.text();

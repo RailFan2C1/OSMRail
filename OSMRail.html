@@ -1,0 +1,94 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this file,
+   - You can obtain one at http://mozilla.org/MPL/2.0/.  -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>OSMRail</title>
+    <meta name="description" content="OSMRail">
+    <link rel="stylesheet" href="vrmap.css">
+ 
+    <script src="https://aframe.io/aframe/dist/aframe-master.min.js"></script>
+    <script src="https://unpkg.com/aframe-animation-component/dist/aframe-animation-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-teleport-controls/dist/aframe-teleport-controls.min.js"></script>
+    <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.controls.min.js"></script>
+    <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.pathfinding.min.js"></script>
+    <script src="https://unpkg.com/osmtogeojson/osmtogeojson.js"></script>
+    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script>
+    <script src="main.js"></script>
+    <script src="position-limit.js"></script>
+    <script src="conversions.js"></script>
+    <script src="tiles.js"></script>
+    <script src="trees.js"></script>
+    <script src="buildings.js"></script>
+    <script src="railways.js"></script>
+    <script src="routes.js"></script>
+
+  </head>
+  <body>
+    <div id="introDialog">
+      
+      <div id="locationSettings">
+      <select id="locationPresets"></select><br>
+      <input class="routes" id="routeId" placeholder="route" value="935322" >route id<br>
+      <input type="number" class="coords" id="locLatitude" placeholder="latitude" step="0.00001" min="-90" max="90" value="48.7643004"> /
+      <input type="number" class="coords" id="locLongitude" placeholder="longitude" step="0.00001" min="-180" max="180" value="9.1686351"><br>
+      show <input type="checkbox" id="showTrees" >trees
+      <input type="checkbox" id="showBuildings" >buildings
+      <input type="checkbox" id="showTies" >ties/sleepers
+      <br>      
+      <button id="locationLoadButton">Start</button>
+      </div>
+
+
+    </div>
+    <a-scene background="color: #CFEBFD">
+      <!--<a-entity id="ground" geometry="primitive: box; width: 100000; height: 0.01; depth: 100000;" position="0 -1 0" material="color: white"></a-entity>-->
+      <a-entity id="map">
+        <a-entity id="tiles">
+        </a-entity>
+        <a-entity id="items">
+        </a-entity>
+      </a-entity>
+      <a-entity id="cameraRig" position="0 0 0" movement-controls="speed: 1; fly: true; camera: #head;" position-limit="ymin: 0; ymax: 100;">
+        <!-- camera -->
+        <a-entity id="head" camera="active: false" look-controls position="0 1.6 0"><a-entity cursor="rayOrigin: mouse;" raycaster="far: 2; objects: .clickable;"></a-entity></a-entity>
+        <!-- hand controls -->
+        <a-mixin id="teleport"
+                 teleport-controls="cameraRig: #cameraRig; button: trigger; teleportOrigin: #head; collisionEntities: #ground; curveShootingSpeed: 25; curveNumberPoints: 100;"
+        ></a-mixin>
+        <a-mixin id="handcursor" cursor="downEvents: triggerdown; upEvents: triggerup;" raycaster="far: 2; showLine: true; objects: .clickable;"></a-mixin>
+        <a-entity id="left-hand" mixin="teleport"
+                  oculus-touch-controls="hand: left;" vive-controls="hand: left;" windows-motion-controls="hand: left;"
+                  daydream-controls="hand: left;" gearvr-controls="hand: left,"></a-entity>
+        <a-entity id="right-hand" mixin="teleport"
+                  oculus-touch-controls="hand: right;" vive-controls="hand: right;" windows-motion-controls="hand: right;"
+                  daydream-controls="hand: right;" gearvr-controls="hand: right;"></a-entity>
+        <!-- menu -->
+        <a-plane id="menu" color="#404040" position="0 2 -1" visible="false"></a-plane>
+      </a-entity>
+
+
+      <a-entity>
+        <a-curve id="path1">
+		      <a-curve-point id="checkpoint1a" position="0 -100 30"></a-curve-point>
+          <a-curve-point id="checkpoint2a" position="0 -100 0"></a-curve-point>
+		    </a-curve>
+        <a-text value="0" position="0 -100 0" width="20" align="center" color="red"></a-text>
+        <a-text value="10" position="0 -100 10" width="20" align="center" color="red"></a-text>
+        <a-text value="20" position="0 -100 20" width="20" align="center" color="red"></a-text>
+        <!--<a-entity id="mover" position="0 0 0" alongpath="curve: #path1; loop:false; dur:10000; delay:60000; triggerRadius:0.1; rotate:true;">-->
+        <a-entity id="mover" position="0 0 0" >
+          <a-box position="0 1.1 0" color="#ffff00" width="2.65" height="3.715" depth="20.105"></a-box>
+          <a-entity id="driver" camera="active: true" look-controls position="0 1 0" active="false"></a-entity><!---->
+        </a-entity>
+        <a-entity id="over" position="0 100 0">
+          <a-entity id="cover" camera="active: false" look-controls  active="false"></a-entity>
+        </a-entity>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>

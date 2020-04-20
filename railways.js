@@ -52,7 +52,7 @@ function loadRailways(loadNext) {
         }
         else {
           console.log("Couldn't draw railway with geometry type " +
-                      feature.geometry.type);
+                      feature.geometry.type + " (" + feature.id + ")");
         }
       }
       console.log("Loaded " + count + " railways.");

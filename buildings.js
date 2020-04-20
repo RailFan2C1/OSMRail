@@ -44,7 +44,7 @@ function loadBuildings(loadNext) {
         }
         else {
           console.log("Couldn't draw building with geometry type " +
-                      feature.geometry.type);
+                      feature.geometry.type + " (" + feature.id + ")");
         }
       }
       console.log("Loaded " + count + " buildings.");
